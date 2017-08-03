@@ -85,30 +85,45 @@ if ($mform->is_cancelled()) {
     if (in_array('$@NONE@$', $notify)) {
         unset($notify[array_search('$@NONE@$', $notify)]);
     }
+    // In the form we are representing 2 db columns with one field.
+    if ($data->expirynotify == 2) {
+        $data->expirynotify = 1;
+        $data->notifyall = 1;
+    } else {
+        $data->notifyall = 0;
+    }
     // Convert back to string for storing in enrol table.
     $data->customtext2 = implode(',', $notify);
     if ($instance->id) {
-        $instance->status       = $data->status;
-        $instance->name         = $data->name;
-        $instance->customtext1  = $data->customtext1;
-        $instance->customtext2  = $data->customtext2;
-        $instance->customint1   = $data->customint1;
-        $instance->customint2   = $data->customint2;
-        $instance->customint3   = $data->customint3;
-        $instance->roleid       = $data->roleid;
+        $instance->status           = $data->status;
+        $instance->name             = $data->name;
+        $instance->customtext1      = $data->customtext1;
+        $instance->customtext2      = $data->customtext2;
+        $instance->customint1       = $data->customint1;
+        $instance->customint2       = $data->customint2;
+        $instance->customint3       = $data->customint3;
+        $instance->roleid           = $data->roleid;
+        $instance->enrolperiod      = $data->enrolperiod;
+        $instance->expirynotify     = $data->expirynotify;
+        $instance->notifyall        = $data->notifyall;
+        $instance->expirythreshold  = $data->expirythreshold;
         $instance->timemodified = time();
         $DB->update_record('enrol', $instance);
-
     } else {
         $fields = array(
-            'status'      => $data->status,
-            'name'        => $data->name,
-            'roleid'      => $data->roleid,
-            'customint1'  => $data->customint1,
-            'customint2'  => $data->customint2,
-            'customint3'  => $data->customint3,
-            'customtext1' => $data->customtext1,
-            'customtext2' => $data->customtext2);
+            'status'            => $data->status,
+            'name'              => $data->name,
+            'roleid'            => $data->roleid,
+            'customint1'        => $data->customint1,
+            'customint2'        => $data->customint2,
+            'customint3'        => $data->customint3,
+            'customtext1'       => $data->customtext1,
+            'customtext2'       => $data->customtext2,
+            'enrolperiod'       => $data->enrolperiod,
+            'expirynotify'      => $data->expirynotify,
+            'notifyall'      => $data->notifyall,
+            'expirythreshold'   => $data->expirythreshold
+        );
         $plugin->add_instance($course, $fields);
     }
 

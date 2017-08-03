@@ -33,6 +33,12 @@ class enrol_apply_edit_form extends moodleform {
 
         list($instance, $plugin, $context) = $this->_customdata;
 
+        // Merge these two settings to one value for the single selection element.
+        if ($instance->notifyall and $instance->expirynotify) {
+            $instance->expirynotify = 2;
+        }
+        unset($instance->notifyall);
+
         $mform->addElement('header', 'header', get_string('pluginname', 'enrol_apply'));
 
         $mform->addElement('text', 'name', get_string('custominstancename', 'enrol'));
@@ -77,6 +83,21 @@ class enrol_apply_edit_form extends moodleform {
         $mform->setType('customint3', PARAM_INT);
         $mform->setDefault('customint3', $plugin->get_config('customint3'));
 
+        $options = array('optional' => true, 'defaultunit' => 86400);
+        $mform->addElement('duration', 'enrolperiod', get_string('defaultperiod', 'enrol_apply'), $options);
+        $mform->setDefault('enrolperiod', $plugin->get_config('enrolperiod'));
+        $mform->addHelpButton('enrolperiod', 'defaultperiod', 'enrol_apply');
+
+        $options = enrol_apply_plugin::get_expirynotify_options();
+        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'core_enrol'), $options);
+        $mform->setDefault('expirynotify', $plugin->get_config('expirynotify'));
+        $mform->addHelpButton('expirynotify', 'expirynotify', 'core_enrol');
+
+        $options = array('optional' => false, 'defaultunit' => 86400);
+        $mform->addElement('duration', 'expirythreshold', get_string('expirythreshold', 'core_enrol'), $options);
+        $mform->addHelpButton('expirythreshold', 'expirythreshold', 'core_enrol');
+        $mform->disabledIf('expirythreshold', 'expirynotify', 'eq', 0);
+
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'courseid');
@@ -85,5 +106,13 @@ class enrol_apply_edit_form extends moodleform {
         $this->add_action_buttons(true, ($instance->id ? null : get_string('addinstance', 'enrol')));
 
         $this->set_data($instance);
+    }
+
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if ($data['expirynotify'] > 0 and $data['expirythreshold'] < 86400) {
+            $errors['expirythreshold'] = get_string('errorthresholdlow', 'core_enrol');
+        }
+        return $errors;
     }
 }

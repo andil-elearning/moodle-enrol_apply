@@ -37,4 +37,7 @@ $messageproviders = array (
 
     // Notify student that his application was deferred (put on a waiting list).
     'waitinglist' => array (),
+
+    // Notify student (and enroller if selected) that enrolment will expire.
+    'expiry_notification' => array(),
 );
